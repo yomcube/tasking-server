@@ -4,8 +4,9 @@ const port = 8000;
 const express = require('express');
 const app = express();
 
-app.use('/', (req, res) => {
+app.use('/', (req, res, next) => {
     console.log(req.method + " '" + req.originalUrl + "'");
+    next();
 });
 
 app.get('/', (req, res) => {
