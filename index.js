@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 const port = 8000;
 const accountdir = 'accounts/'
+const pagetoredirect = "https://yomcube.github.io/tasking";
 const fs = require('fs');
 const cookieSession = require('cookie-session');
 const express = require('express');
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieSession({
+  name: 'session',
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 app.use('/', (req, res, next) => {
 	console.log(req.method + " '" + req.originalUrl + "'");
 	next();
@@ -14,7 +19,7 @@ app.use('/', (req, res, next) => {
 
 app.use('/', (req, res) => {
 	res.set('Content-Type', 'text/plain');
-	res.end('test');
+	res.redirect(pagetoredirect);
 });
 app.use('/signup', (req, res) => {
 	if (req.method != 'POST') {res.status(501).end(); return;}
@@ -25,7 +30,7 @@ app.use('/signup', (req, res) => {
 	}
 	fs.writeFile(accountdir + req.username + '/pass', req.password, (err) => {
 		if (err) {throw err; res.status(500).end('Something went wrong.'); return;}
-		else res.status(201).end('200 Created');
+		else res.redirect(pagetoredirect);
 	});
 });
 app.use('/login', (req, res) => {
@@ -38,10 +43,13 @@ app.use('/login', (req, res) => {
 		if (err) {throw err; res.status(500).end('Something went wrong.'); return;}
 		if (req.password.toString() == data) {
 			req.session.user = req.body.username;
-			res.status(200).end('200 OK');
+			res.redirect(pagetoredirect);
 			return;
 		}
 		res.status(400).end();
 	});
+});
+app.use('/logout', (req, res) => {
+	req.session = null;
 });
 app.listen(8000);
