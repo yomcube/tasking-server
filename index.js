@@ -1,7 +1,10 @@
 #!/usr/bin/env node
+/* Change the port if needed */
 const port = 8000;
 const accountdir = 'accounts/'
-const pagetoredirect = "https://yomcube.github.io/tasking";
+const redirectpage = "https://yomcube.github.io/tasking";
+const wrongparammsg = 'must have both username and password parameters';
+
 const fs = require('fs');
 const cookieSession = require('cookie-session');
 const express = require('express');
@@ -11,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'session',
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 app.use('/', (req, res, next) => {
 	console.log(req.method + " '" + req.originalUrl + "'");
 	next();
@@ -19,37 +22,39 @@ app.use('/', (req, res, next) => {
 
 app.use('/', (req, res) => {
 	res.set('Content-Type', 'text/plain');
-	res.redirect(pagetoredirect);
+	res.redirect(redirectpage);
 });
 app.use('/signup', (req, res) => {
 	if (req.method != 'POST') {res.status(501).end(); return;}
 	if (!req.body.username || !req.body.password) {
-		res.set('Content-Type', 'text/plain');
-		res.status(400).end('must have both username and password parameters');
+		res.status(400).end(wrongparammsg);
 		return;
 	}
 	fs.writeFile(accountdir + req.username + '/pass', req.password, (err) => {
-		if (err) {throw err; res.status(500).end('Something went wrong.'); return;}
-		else res.redirect(pagetoredirect);
+		if (err) {throw err; res.status(500).end('Something went wrong.');}
+		else res.redirect(redirectpage);
 	});
 });
 app.use('/login', (req, res) => {
 	if (req.method != 'POST') {res.status(501).end(); return;}
-	if (!req.body.username || !req.body.password) {res.set('Content-Type', 'text/plain');
-		res.status(400).end('must have both username and password parameters');
+	if (!req.body.username || !req.body.password) {
+		res.status(400).end(wrongparammsg);
 		return;
 	}
 	fs.readFile(accountdir + req.username + '/pass', (err, data) => {
 		if (err) {throw err; res.status(500).end('Something went wrong.'); return;}
 		if (req.password.toString() == data) {
 			req.session.user = req.body.username;
-			res.redirect(pagetoredirect);
+			res.redirect(redirectpage);
 			return;
 		}
-		res.status(400).end();
+		else {
+			res.status(400).end('Wrong password!');
+			return;
+		}
 	});
 });
 app.use('/logout', (req, res) => {
 	req.session = null;
 });
-app.listen(8000);
+app.listen(port);
