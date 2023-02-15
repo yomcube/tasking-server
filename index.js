@@ -16,7 +16,7 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 app.use('/', (req, res, next) => {
-	console.log(req.method + " '" + req.originalUrl + "'");
+	console.log(`${req.method} ${req.originalUrl}`);
 	next();
 });
 
