@@ -20,7 +20,7 @@ app.use('/', (req, res) => {
 	res.redirect(redirectpage);
 });
 app.use('/signup', (req, res) => {
-	if (req.method != 'POST') {res.status(405).end(); return;}
+	if (req.method != 'POST') {res.set('Allow', 'POST'); res.status(405).end(); return;}
 	if (!req.body.username || !req.body.password) {
 		res.status(400).end(wrongparammsg);
 		return;
@@ -31,7 +31,7 @@ app.use('/signup', (req, res) => {
 	});
 });
 app.use('/login', (req, res) => {
-	if (req.method != 'POST') {res.status(405).end(); return;}
+	if (req.method != 'POST') {res.set('Allow', 'POST'); res.status(405).end(); return;}
 	if (!req.body.username || !req.body.password) {
 		res.status(400).end(wrongparammsg);
 		return;
