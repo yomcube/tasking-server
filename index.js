@@ -11,21 +11,16 @@ const express = require('express');
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieSession({
-  name: 'session',
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}));
 app.use('/', (req, res, next) => {
 	console.log(`${req.method} ${req.originalUrl}`);
 	next();
 });
 
 app.use('/', (req, res) => {
-	res.set('Content-Type', 'text/plain');
 	res.redirect(redirectpage);
 });
 app.use('/signup', (req, res) => {
-	if (req.method != 'POST') {res.status(501).end(); return;}
+	if (req.method != 'POST') {res.status(405).end(); return;}
 	if (!req.body.username || !req.body.password) {
 		res.status(400).end(wrongparammsg);
 		return;
@@ -36,7 +31,7 @@ app.use('/signup', (req, res) => {
 	});
 });
 app.use('/login', (req, res) => {
-	if (req.method != 'POST') {res.status(501).end(); return;}
+	if (req.method != 'POST') {res.status(405).end(); return;}
 	if (!req.body.username || !req.body.password) {
 		res.status(400).end(wrongparammsg);
 		return;
